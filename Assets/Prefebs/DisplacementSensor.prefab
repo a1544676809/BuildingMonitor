@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4246731484220654228}
   - component: {fileID: -7027093011137426850}
-  - component: {fileID: 2370828830716959456}
+  - component: {fileID: 3141256006840271364}
   m_Layer: 0
   m_Name: DisplacementSensor
   m_TagString: Untagged
@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 6466552066989686601}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.03, y: 0.001, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -63,7 +63,7 @@ MonoBehaviour:
     deflectionValue: 0
     totalDisplacement: 0
   uiController: {fileID: 0}
---- !u!65 &2370828830716959456
+--- !u!65 &3141256006840271364
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -95,7 +95,6 @@ GameObject:
   - component: {fileID: 6964198414732775605}
   - component: {fileID: 2759063437369187806}
   - component: {fileID: 5706027473059969385}
-  - component: {fileID: 3867042043128300345}
   m_Layer: 0
   m_Name: DisplacementSensorModel
   m_TagString: Untagged
@@ -171,24 +170,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3867042043128300345
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7270396694324991462}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
