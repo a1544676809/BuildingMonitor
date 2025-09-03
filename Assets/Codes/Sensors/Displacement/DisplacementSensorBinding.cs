@@ -9,6 +9,26 @@ public class DisplacementSensorsBinding : MonoBehaviour
     // 这个字段用于存储传感器最近的数据
     public DisplacementSensorData latestData;
 
+    // 缓存对UI控制器的引用
+    public SensorInfoPanelController uiController;
+
+    void OnMouseDown()
+    {
+        if (uiController != null)
+        {
+            // 如果UI已经可见，则隐藏它
+            if (uiController.gameObject.activeSelf)
+            {
+                uiController.HidePanel();
+            }
+            else
+            {
+                // 调用UI控制器的方法，将当前传感器的数据传递给它
+                uiController.ShowPanel(sensorId, latestData);
+            }
+        }
+    }
+
     // 一个公共方法，用于从后端数据中更新预制件的状态
     public void UpdateData(DisplacementSensorData newData)
     {
