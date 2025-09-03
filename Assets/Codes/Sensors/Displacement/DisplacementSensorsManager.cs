@@ -10,6 +10,9 @@ public class DisplacementSensorsManager : MonoBehaviour
 {
 
     public GameObject displacementSensorPrefab;
+    public SensorInfoPanelController uiController;
+
+
     private string apiUrl = "http://localhost:8080/api"; // API URL
     // 存储已实例化的传感器对象，以便后续更新
     private Dictionary<int, GameObject> instantiatedSensors = new Dictionary<int, GameObject>();
@@ -40,6 +43,8 @@ public class DisplacementSensorsManager : MonoBehaviour
                     DisplacementSensorsBinding binding = newSensor.GetComponent<DisplacementSensorsBinding>();
                     if(binding != null)
                     {
+                        // 在实例化时，将UI控制器的引用传递给传感器
+                        binding.uiController = this.uiController;
                         // 绑定传感器ID
                         binding.sensorId = sensorInfo.sensorId;
                         // 将新创建的对象存储到字典中，以 sensorId 为键
@@ -102,6 +107,13 @@ public class DisplacementSensorsManager : MonoBehaviour
     //当MonoBehaviour 创建后，第一次执行 Update 之前调用
     void Start()
     {
+        // 在开始时检查UI控制器是否已绑定
+        if (uiController == null)
+        {
+            Debug.LogError("UI 控制器未绑定！请在管理器上设置 UI 引用。");
+            return;
+        }
+
         // 启动一个协程，在程序开始时获取所有传感器列表
         StartCoroutine(FetchAndInstantiateDisplacementSensors());
 
