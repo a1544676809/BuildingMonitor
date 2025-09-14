@@ -22,7 +22,7 @@ public class SensorInfoPanelController : MonoBehaviour
         nameText.text = "传感器 ID: " + sensorId;
         if(typeText != null)
             typeText.text = "类型: 位移传感器";
-        string pos = $"X: {data.currentX:F2}\nY: {data.currentY:F2}\nZ: {data.currentZ:F2}";
+        string pos = $"X: {data.currentX:F2} Y: {data.currentY:F2} Z: {data.currentZ:F2}";
         latestInfoText.text = pos;
 
         // 可选：将面板位置移动到屏幕中心或特定位置

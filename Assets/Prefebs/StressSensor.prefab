@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7479030978608327990}
   - component: {fileID: -815478901106101929}
+  - component: {fileID: 7655030452235297352}
   m_Layer: 0
   m_Name: StressSensor
   m_TagString: Untagged
@@ -54,6 +55,27 @@ MonoBehaviour:
     strainValue: 0
     stressValue: 0
     temperatureCelsius: 0
+--- !u!65 &7655030452235297352
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3879808301590159874}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6566158813419506252
 GameObject:
   m_ObjectHideFlags: 0

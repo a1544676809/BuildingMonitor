@@ -11,7 +11,6 @@ namespace Assets.Codes.Entities
     public class SensorsInfo
     {
         public int sensorId;
-
         public string sensorName;
         public string manufacturer;
         public string modelName;
@@ -23,6 +22,9 @@ namespace Assets.Codes.Entities
         public double initialBaselineX;
         public double initialBaselineY;
         public double initialBaselineZ;
+        public double unity_baseline_X;
+        public double unity_baseline_Y;
+        public double unity_baseline_Z;
         public string sensorType;
         public int status;
         public string mac;//设备硬件地址

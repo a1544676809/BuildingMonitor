@@ -14,6 +14,7 @@ public class DisplacementSensorsBinding : MonoBehaviour
 
     void OnMouseDown()
     {
+        Debug.Log("传感器被点击了!");
         if (uiController != null)
         {
             // 如果UI已经可见，则隐藏它
@@ -28,6 +29,8 @@ public class DisplacementSensorsBinding : MonoBehaviour
             }
         }
     }
+
+    
 
     // 一个公共方法，用于从后端数据中更新预制件的状态
     public void UpdateData(DisplacementSensorData newData)
