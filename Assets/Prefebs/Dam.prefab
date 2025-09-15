@@ -166,6 +166,8 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
+  editModePanel: {fileID: 0}
+  sensorEditPanel: {fileID: 0}
 --- !u!1 &5246089882699181986
 GameObject:
   m_ObjectHideFlags: 0
@@ -261,7 +263,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1113560057936324826}
-  - component: {fileID: 5214302946809298439}
   - component: {fileID: 3354395069346665192}
   m_Layer: 0
   m_Name: desirefx_me_1
@@ -285,14 +286,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6491562415930064678}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &5214302946809298439
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7408976446295274013}
-  m_Mesh: {fileID: -6342137125680038384, guid: df54facc9af1c5a44852676070bdc8a5, type: 3}
 --- !u!23 &3354395069346665192
 MeshRenderer:
   m_ObjectHideFlags: 0

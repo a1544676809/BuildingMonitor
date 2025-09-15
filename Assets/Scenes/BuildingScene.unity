@@ -4856,6 +4856,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3024825401910652138, guid: b1b4a15284e48d94b85cda258dc8b66d, type: 3}
   m_PrefabInstance: {fileID: 119908972}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &119908974 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4694893136853151816, guid: b1b4a15284e48d94b85cda258dc8b66d, type: 3}
+  m_PrefabInstance: {fileID: 119908972}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &120419443
 GameObject:
   m_ObjectHideFlags: 0
@@ -19356,9 +19367,17 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4995516638060834701, guid: 826bd029d6f558247a35e6479984e6a1, type: 3}
+      propertyPath: editModePanel
+      value: 
+      objectReference: {fileID: 1593259068}
+    - target: {fileID: 4995516638060834701, guid: 826bd029d6f558247a35e6479984e6a1, type: 3}
       propertyPath: influenceRadius
       value: 20
       objectReference: {fileID: 0}
+    - target: {fileID: 4995516638060834701, guid: 826bd029d6f558247a35e6479984e6a1, type: 3}
+      propertyPath: sensorEditPanel
+      value: 
+      objectReference: {fileID: 1206838033}
     - target: {fileID: 4995516638060834701, guid: 826bd029d6f558247a35e6479984e6a1, type: 3}
       propertyPath: sensorGizmoPrefab
       value: 
@@ -19366,11 +19385,11 @@ PrefabInstance:
     - target: {fileID: 4995516638060834701, guid: 826bd029d6f558247a35e6479984e6a1, type: 3}
       propertyPath: stressSensorGizmoPrefab
       value: 
-      objectReference: {fileID: 3879808301590159874, guid: 69830176661f4e64a93099c4fb205353, type: 3}
+      objectReference: {fileID: 3879808301590159874, guid: dbb6aafa1956fa14db052bef47b480f6, type: 3}
     - target: {fileID: 4995516638060834701, guid: 826bd029d6f558247a35e6479984e6a1, type: 3}
       propertyPath: displacementSensorGizmoPrefab
       value: 
-      objectReference: {fileID: 6466552066989686601, guid: 182102a14481a444fbd7204946d198bd, type: 3}
+      objectReference: {fileID: 6466552066989686601, guid: 756cae3df2aa9b74ea3afde30efc902d, type: 3}
     - target: {fileID: 6491562415930064678, guid: 826bd029d6f558247a35e6479984e6a1, type: 3}
       propertyPath: m_LocalScale.x
       value: 10
@@ -22640,7 +22659,6 @@ RectTransform:
   - {fileID: 765513937}
   - {fileID: 1177579113}
   - {fileID: 396836124}
-  - {fileID: 1363642120}
   - {fileID: 260316671}
   m_Father: {fileID: 1135222232}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -47226,7 +47244,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1206838034
 RectTransform:
   m_ObjectHideFlags: 0
@@ -47253,13 +47271,14 @@ RectTransform:
   - {fileID: 1602504403}
   - {fileID: 614833319}
   - {fileID: 689502137}
+  - {fileID: 2119540681}
   m_Father: {fileID: 396836124}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -200, y: -375}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -75, y: -487.5}
   m_SizeDelta: {x: 350, y: 325}
-  m_Pivot: {x: 0, y: 1}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1206838035
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47272,6 +47291,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c5b8a5f5eea72d4a80c897809695dc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sensorTypeDropdown: {fileID: 1006521049}
+  sensorIdDropdown: {fileID: 134190135}
+  xAxisInputField: {fileID: 1033521180}
+  yAxisInputField: {fileID: 981423998}
+  zAxisInputField: {fileID: 1602504404}
+  saveButton: {fileID: 614833320}
+  cancelButton: {fileID: 689502138}
+  closeButton: {fileID: 119908974}
 --- !u!114 &1206838036
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -52721,42 +52748,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1360938757}
   m_CullTransparentMesh: 1
---- !u!1 &1363642119
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1363642120}
-  m_Layer: 5
-  m_Name: InfoPanelRoot
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1363642120
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1363642119}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 2119540681}
-  m_Father: {fileID: 606056840}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -465}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1364330515
 GameObject:
   m_ObjectHideFlags: 0
@@ -55825,6 +55816,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displacementSensorPrefab: {fileID: 6466552066989686601, guid: 182102a14481a444fbd7204946d198bd, type: 3}
   uiController: {fileID: 2119540682}
+  deformableModelController: {fileID: 1545436538}
 --- !u!4 &1421560769
 Transform:
   m_ObjectHideFlags: 0
@@ -86392,13 +86384,13 @@ RectTransform:
   - {fileID: 867163068}
   - {fileID: 1129952903}
   - {fileID: 1723397615}
-  m_Father: {fileID: 1363642120}
+  m_Father: {fileID: 1206838034}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 1, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: 847, y: 22.5}
   m_SizeDelta: {x: 1920, y: 1080}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &2119540682
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86415,6 +86407,7 @@ MonoBehaviour:
   typeText: {fileID: 867163069}
   latestInfoText: {fileID: 1129952904}
   statusText: {fileID: 1723397616}
+  editModeToggle: {fileID: 260316672}
 --- !u!114 &2119540683
 MonoBehaviour:
   m_ObjectHideFlags: 0
