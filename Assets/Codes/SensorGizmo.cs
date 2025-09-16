@@ -1,24 +1,23 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.XR;
 
-public class SensorGizmo : MonoBehaviour, IDragHandler
+public class SensorGizmo : MonoBehaviour, IPointerClickHandler
 {
     private int sensorId;
+    private DeformableModelController controller;
     public void SetSensorId(int id)
     {
         sensorId = id;
     }
 
-    public void OnDrag(PointerEventData eventData)
+    // 仅保留点击事件
+    public void OnPointerClick(PointerEventData eventData)
     {
-        // 将鼠标的屏幕坐标转换为世界坐标
-        Vector3 newPosition = Camera.main.ScreenToWorldPoint(eventData.position);
-
-        // 确保 Gizmo 保持在模型表面，这里只是简单的例子
-        newPosition.z = transform.position.z;
-
-        // 更新 Gizmo 的位置
-        transform.position = newPosition;
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            controller.OpenEditPanel(sensorId);
+        }
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

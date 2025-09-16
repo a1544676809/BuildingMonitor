@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 6466552066989686601}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.03, y: 0.001, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -63,6 +63,7 @@ MonoBehaviour:
     deflectionValue: 0
     totalDisplacement: 0
   uiController: {fileID: 0}
+  unityBaseline: {x: 0, y: 0, z: 0}
 --- !u!65 &7542354408118919115
 BoxCollider:
   m_ObjectHideFlags: 0

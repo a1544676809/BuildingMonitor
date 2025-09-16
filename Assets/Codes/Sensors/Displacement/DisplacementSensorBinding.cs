@@ -11,6 +11,8 @@ public class DisplacementSensorsBinding : MonoBehaviour
 
     // 缓存对UI控制器的引用
     public SensorInfoPanelController uiController;
+    // 新增：用于存储传感器的Unity基准点
+    public Vector3 unityBaseline;
 
     void OnMouseDown()
     {
@@ -24,26 +26,21 @@ public class DisplacementSensorsBinding : MonoBehaviour
             }
             else
             {
-                // 调用UI控制器的方法，将当前传感器的数据传递给它
-                uiController.ShowPanel(sensorId, latestData);
+                if (uiController.editModeToggle.isOn == false) 
+                {
+                    // 调用UI控制器的方法，将当前传感器的数据传递给它
+                    uiController.ShowPanel(sensorId, latestData, unityBaseline);
+                }
             }
         }
     }
 
     
-
+        
     // 一个公共方法，用于从后端数据中更新预制件的状态
     public void UpdateData(DisplacementSensorData newData)
     {
         this.latestData = newData;
-
-        // 根据最新数据更新对象的位置
-        Vector3 newPosition = new Vector3(
-            (float)newData.currentX,
-            (float)newData.currentY,
-            (float)newData.currentZ
-        );
-        transform.position = newPosition;
 
         // 如果有子对象需要更新，可以在这里进行
         Renderer renderer = transform.Find("DisplacementSensorModel")?.GetComponent<Renderer>();
@@ -60,5 +57,9 @@ public class DisplacementSensorsBinding : MonoBehaviour
                 renderer.material.color = Color.green;
             }
         }
+    }
+    public void Start()
+    {
+
     }
 }

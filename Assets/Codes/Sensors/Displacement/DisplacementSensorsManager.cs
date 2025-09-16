@@ -16,6 +16,8 @@ public class DisplacementSensorsManager : MonoBehaviour
     private string apiUrl = "http://localhost:8080/api"; // API URL
     // 存储已实例化的传感器对象，以便后续更新
     private Dictionary<int, GameObject> instantiatedSensors = new Dictionary<int, GameObject>();
+    private Dictionary<int, SensorsInfo> allSensorsInfo = new Dictionary<int, SensorsInfo>();
+    public DeformableModelController deformableModelController; // 新增：对 DeformableModelController 的引用
 
     // 协程：获取所有传感器信息并实例化预制件
     IEnumerator FetchAndInstantiateDisplacementSensors()
@@ -34,9 +36,20 @@ public class DisplacementSensorsManager : MonoBehaviour
                 // 解析JSON字符串为SensorsInfo列表
                 List<SensorsInfo> sensorsList = JsonConvert.DeserializeObject<List<SensorsInfo>>(jsonResponse);
 
+
+                // 清空旧数据
+                allSensorsInfo.Clear();
+                foreach (var kvp in instantiatedSensors)
+                {
+                    Destroy(kvp.Value);
+                }
+                instantiatedSensors.Clear();
+
                 // 遍历列表，为每个传感器创建实例
                 foreach (var sensorInfo in sensorsList)
                 {
+                    // 将完整信息存储起来，包括 unity_baseline
+                    allSensorsInfo[sensorInfo.sensorId] = sensorInfo;
                     // 在场景中实例化预制件
                     GameObject newSensor = Instantiate(displacementSensorPrefab);
                     //// 获取 SensorBinding 组件
@@ -48,6 +61,10 @@ public class DisplacementSensorsManager : MonoBehaviour
                         // 绑定传感器ID
                         binding.sensorId = sensorInfo.sensorId;
                         // 将新创建的对象存储到字典中，以 sensorId 为键
+                        binding.unityBaseline = new Vector3(
+                        (float)sensorInfo.unityBaselineX,
+                        (float)sensorInfo.unityBaselineY,
+                        (float)sensorInfo.unityBaselineZ);
                         instantiatedSensors[sensorInfo.sensorId] = newSensor;
                     }
                 }
@@ -70,7 +87,7 @@ public class DisplacementSensorsManager : MonoBehaviour
             {
                 DisplacementSensorsBinding binding = kvp.Value.GetComponent<DisplacementSensorsBinding>();
                 // 获取传感器数据
-                yield return StartCoroutine(FetchSensorLatestData(binding,displacementSensorPrefab));
+                yield return StartCoroutine(FetchSensorLatestData(binding, kvp.Value));
             }
         }
     }
@@ -91,18 +108,32 @@ public class DisplacementSensorsManager : MonoBehaviour
                     binding.UpdateData(latestData); // <--- 在这里调用绑定脚本的更新方法
                 }
 
-                // 将后端坐标转换为Unity世界坐标
-                Vector3 newPosition = new Vector3((float)latestData.currentX, (float)latestData.currentY, (float)latestData.currentZ);
+                //计算位移并应用到 Unity 基准点
+                Vector3 displacement = new Vector3(
+                    (float)(latestData.horizontalDisplacementX),
+                    (float)(latestData.horizontalDisplacementY),
+                    (float)(latestData.settlement)
+                );
+
+                // 从 binding 中获取 unityBaseline
+                Vector3 unityBaseline = binding.unityBaseline;
 
                 // 更新传感器对象的位置
-                sensorObject.transform.position = newPosition;
+                sensorObject.transform.position = unityBaseline + displacement;
 
                 // 也可以在这里更新其他状态，例如颜色、UI等
-                Debug.Log($"Sensor {binding.sensorId} updated to position: {newPosition}");
+                Debug.Log($"Sensor {binding.sensorId} updated to position: {binding.unityBaseline + displacement}");
+
+                // 新增：将位移数据传递给模型控制器
+                if (deformableModelController != null)
+                {
+                    deformableModelController.UpdateDisplacementData(binding.sensorId, displacement);
+                }
             }
         }
 
     }
+
 
     //当MonoBehaviour 创建后，第一次执行 Update 之前调用
     void Start()

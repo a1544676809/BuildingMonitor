@@ -11,6 +11,7 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 using XCharts;
 using XCharts.Runtime;
+using static UnityEditor.LightingExplorerTableColumn;
 
 public class DataVisualizationPanel : MonoBehaviour
 {
@@ -24,6 +25,7 @@ public class DataVisualizationPanel : MonoBehaviour
     //下拉菜单
     public TMP_Dropdown sensorTypeDropdown;
     public TMP_Dropdown sensorDropdown;
+    public TMP_Dropdown DataTypeDropdown;
     //日期选择器
     public DatePicker_DateRange datePicker;
 
@@ -37,16 +39,57 @@ public class DataVisualizationPanel : MonoBehaviour
     private List<string> sensorTypes = new List<string> { "位移传感器", "应力传感器" };
     private Dictionary<string, List<string>> availableSensorIds = new Dictionary<string, List<string>>();
 
+    // 新增：可选择的数据类型
+    private List<string> displacementDataTypes = new List<string> { "总挠度", "水平位移", "沉降" };
+    private List<string> stressDataTypes = new List<string> { "应力" };
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     void InitializeDropdowns()
     {
-        // 填充传感器类型下拉框
+        // 初始化传感器类型下拉框
         sensorTypeDropdown.ClearOptions();
         sensorTypeDropdown.AddOptions(sensorTypes);
 
+        // 初始化数据类型下拉框
+        DataTypeDropdown.ClearOptions();
+        DataTypeDropdown.AddOptions(displacementDataTypes);
+
         // 从后端获取所有可用的传感器ID，并填充到字典中
         StartCoroutine(FetchAllSensorIds());
+    }
+
+    public void SetDropdownSelections(string sensorType, string dataType)
+    {
+        // 1. 设置传感器类型下拉框
+        int sensorTypeIndex = sensorTypes.IndexOf(sensorType);
+        if (sensorTypeIndex >= 0)
+        {
+            sensorTypeDropdown.value = sensorTypeIndex;
+
+            // 确保数据类型下拉框已更新
+            OnSensorTypeChanged(sensorTypeIndex);
+        }
+
+        // 2. 设置数据类型下拉框
+        List<string> currentDataTypes = new List<string>();
+        if (sensorType == "位移传感器")
+        {
+            currentDataTypes = displacementDataTypes;
+        }
+        else if (sensorType == "应力传感器")
+        {
+            currentDataTypes = stressDataTypes;
+        }
+
+        int dataTypeIndex = currentDataTypes.IndexOf(dataType);
+        if (dataTypeIndex >= 0)
+        {
+            DataTypeDropdown.value = dataTypeIndex;
+        }
+
+        // 最后，触发一次查询来更新图表
+        OnQueryButtonClicked();
     }
 
     IEnumerator FetchAllSensorIds()
@@ -92,6 +135,16 @@ public class DataVisualizationPanel : MonoBehaviour
             sensorDropdown.AddOptions(availableSensorIds[selectedType]);
         }
 
+        // 根据传感器类型，更新数据类型下拉框的选项
+        if (selectedType == "位移传感器")
+        {
+            DataTypeDropdown.AddOptions(displacementDataTypes);
+        }
+        else if (selectedType == "应力传感器")
+        {
+            DataTypeDropdown.AddOptions(stressDataTypes);
+        }
+
         // 当类型改变时，自动触发一次查询以显示默认数据
         OnQueryButtonClicked();
     }
@@ -110,7 +163,7 @@ public class DataVisualizationPanel : MonoBehaviour
     {
         string selectedType = sensorTypes[sensorTypeDropdown.value];
         string selectedId = sensorDropdown.options[sensorDropdown.value].text;
-
+        string selectedDataType = DataTypeDropdown.options[DataTypeDropdown.value].text;
         // 获取日期选择器的值
         string startDate = datePicker.FromDate.Date.ToString("yyyy-MM-dd");
         string endDate = datePicker.ToDate.Date.ToString("yyyy-MM-dd");
@@ -125,15 +178,15 @@ public class DataVisualizationPanel : MonoBehaviour
         // 根据传感器类型调用不同的协程
         if (selectedType == "位移传感器")
         {
-            StartCoroutine(FetchDisplacementData(selectedId, startTime, endTime));
+            StartCoroutine(FetchDisplacementData(selectedId, startTime, endTime, selectedDataType));
         }
         else if (selectedType == "应力传感器")
         {
-            StartCoroutine(FetchStressData(selectedId, startTime, endTime));
+            StartCoroutine(FetchStressData(selectedId, startTime, endTime, selectedDataType));
         }
     }
 
-    IEnumerator FetchDisplacementData(string sensorId, string startTime, string endTime)
+    IEnumerator FetchDisplacementData(string sensorId, string startTime, string endTime, string dataType)
     {
         string url = $"{apiBaseUrl}/displacement/history/{sensorId}?startTime={startTime}&endTime={endTime}";
         // ... 发送UnityWebRequest并处理响应，更新lineChart ...
@@ -160,6 +213,25 @@ public class DataVisualizationPanel : MonoBehaviour
                         DateTime dataPointTime = dataPoint.timestamp.DateTime;
                         long unixTimestamp = dataPoint.timestamp.ToUnixTimeSeconds();
 
+                        double value = 0;
+                        // 根据选择的数据类型，从数据点中提取相应的值
+                        switch (dataType)
+                        {
+                            case "总挠度":
+                                value = dataPoint.deflectionValue; // 你的后端已经计算了这个值
+                                break;
+                            case "水平位移":
+                                value = dataPoint.totalHorizontalDisplacement;
+                                break;
+                            case "沉降":
+                                value = dataPoint.settlement;
+                                break;
+                            default:
+                                value = dataPoint.deflectionValue;
+                                break;
+                        }
+
+
                         // 更新最早和最晚日期
                         if (dataPointTime < minDate)
                         {
@@ -170,7 +242,7 @@ public class DataVisualizationPanel : MonoBehaviour
                             maxDate = dataPointTime;
                         }
                         // 添加包含时间戳和数据值的数据点
-                        series.AddXYData(unixTimestamp, dataPoint.totalDisplacement);
+                        series.AddXYData(unixTimestamp, value);
                     }
                     UpdateDateTimeRangeText(minDate, maxDate);
                     Debug.Log("位移数据点数量: " + historyData.Count);
@@ -189,7 +261,7 @@ public class DataVisualizationPanel : MonoBehaviour
         }
     }
 
-    IEnumerator FetchStressData(string sensorId, string startTime, string endTime)
+    IEnumerator FetchStressData(string sensorId, string startTime, string endTime, string dataType)
     {
         // 假设后端有不同的API来获取应力数据
         string url = $"{apiBaseUrl}/stress/history/{sensorId}?startTime={startTime}&endTime={endTime}";
@@ -258,14 +330,21 @@ public class DataVisualizationPanel : MonoBehaviour
         }
     }
 
+    void OnDataTypeChanged(int index)
+    {
+        // 当数据类型改变时，重新进行查询
+        OnQueryButtonClicked();
+    }
+
     void Start()
     {
         closeButton.onClick.AddListener(OnCloseButtonClicked);
         qureyButton.onClick.AddListener(OnQueryButtonClicked);
         refreshButton.onClick.AddListener(OnRefreshButtonClicked);
+        DataTypeDropdown.onValueChanged.AddListener(OnDataTypeChanged);
         datePicker.FromDate = System.DateTime.Now.AddDays(-30);
         datePicker.ToDate = System.DateTime.Now;
-        FetchAllSensorIds();
+
         InitializeDropdowns();
     }
 

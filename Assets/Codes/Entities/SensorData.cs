@@ -22,9 +22,9 @@ namespace Assets.Codes.Entities
         public double initialBaselineX;
         public double initialBaselineY;
         public double initialBaselineZ;
-        public double unity_baseline_X;
-        public double unity_baseline_Y;
-        public double unity_baseline_Z;
+        public double unityBaselineX;
+        public double unityBaselineY;
+        public double unityBaselineZ;
         public string sensorType;
         public int status;
         public string mac;//设备硬件地址
