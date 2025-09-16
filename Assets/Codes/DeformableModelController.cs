@@ -2,10 +2,10 @@ using Assets.Codes.Entities;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using MegaFiers;
 
 public class DeformableModelController : MonoBehaviour
 {
@@ -20,14 +20,6 @@ public class DeformableModelController : MonoBehaviour
 
     private Dictionary<int, GameObject> sensorGizmos = new Dictionary<int, GameObject>();
 
-
-    // 存储每个子网格的网格数据
-    private Mesh[] meshes;
-    private Vector3[][] originalVertices;
-    private Vector3[][] deformedVertices;
-    private Color[][] originalColors;
-    private MeshRenderer[] meshRenderers;
-
     // 存储所有传感器的数据
     private List<SensorData> sensorDataList = new List<SensorData>();
 
@@ -40,22 +32,28 @@ public class DeformableModelController : MonoBehaviour
     // 存储所有传感器的最新应力数据
     private Dictionary<int, float> currentStressValues = new Dictionary<int, float>();
 
-    // 影响半径：用于确定一个传感器影响周围多大范围的顶点
-    public float influenceRadius = 5.0f;
     // 编辑模式状态
     private bool isEditMode = false;
-    // 后端 API 地址
+    // 后端 API 地址    
     private string apiBaseUrl = "http://localhost:8080/api";
     // 应力热图颜色渐变（可选）
     public Gradient stressColorGradient;
 
     public GameObject editModePanel; // 主编辑面板
     public GameObject sensorEditPanel; // 传感器编辑面板
-
+    public SensorListPanelController sensorListPanelController;
 
     // 存储所有传感器的 SensorsInfo 完整信息
     private Dictionary<int, SensorsInfo> allSensorsInfo = new Dictionary<int, SensorsInfo>();
 
+    
+    public float influenceRadius = 0.03f;
+
+    private Dictionary<int, MegaSpherifyWarp> sensorWarps = new Dictionary<int, MegaSpherifyWarp>();
+
+    // 存储每个网格对象和其对应的 MegaModifyObject 和 MegaWarpBind
+    private Dictionary<GameObject, MegaModifyObject> meshModifiers = new Dictionary<GameObject, MegaModifyObject>();
+    private Dictionary<GameObject, MegaWarpBind> meshWarpBinds = new Dictionary<GameObject, MegaWarpBind>();
 
 
 
@@ -152,15 +150,49 @@ public class DeformableModelController : MonoBehaviour
             yield return webRequest.SendWebRequest();
             if (webRequest.result == UnityWebRequest.Result.Success)
             {
-                string jsonResponse = webRequest.downloadHandler.text;
-                Debug.Log(webRequest.downloadHandler.text);
-
                 // 清空旧数据和Gizmo，以便重新加载
                 allSensorsInfo.Clear();
+                string jsonResponse = webRequest.downloadHandler.text;
+                Debug.Log(webRequest.downloadHandler.text);
                 foreach (var gizmo in sensorGizmos.Values) Destroy(gizmo);
                 sensorGizmos.Clear();
+                foreach (var warp in sensorWarps.Values) Destroy(warp.gameObject);
+                sensorWarps.Clear();
+
+
 
                 List<SensorsInfo> sensors = JsonConvert.DeserializeObject<List<SensorsInfo>>(jsonResponse);
+
+                if (sensorListPanelController != null)
+                {
+                    
+                    sensorListPanelController.PopulateSensorList(sensors);
+                }
+
+                // 查找所有包含 MeshFilter 的子对象
+                MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
+
+                foreach (MeshFilter meshFilter in meshFilters)
+                {
+                    GameObject targetGo = meshFilter.gameObject;
+
+                    // 1. 添加 MegaModifyObject 组件
+                    MegaModifyObject modifier = targetGo.GetComponent<MegaModifyObject>();
+                    if (modifier == null)
+                    {
+                        modifier = targetGo.AddComponent<MegaModifyObject>();
+                    }
+                    meshModifiers[targetGo] = modifier;
+
+                    // 2. 添加 MegaWarpBind 组件
+                    MegaWarpBind warpBind = targetGo.GetComponent<MegaWarpBind>();
+                    if (warpBind == null)
+                    {
+                        warpBind = targetGo.AddComponent<MegaWarpBind>();
+                    }
+                    meshWarpBinds[targetGo] = warpBind;
+                }
+
 
                 foreach (var sensor in sensors)
                 {
@@ -177,6 +209,25 @@ public class DeformableModelController : MonoBehaviour
                     if (sensor.sensorType == "位移传感器")
                     {
                         gizmo = Instantiate(displacementSensorGizmoPrefab, position, Quaternion.identity);
+
+                        // 为每个传感器创建一个独立的 Warp 对象
+                        GameObject warpGo = new GameObject("SensorWarp_" + sensor.sensorId);
+
+                        warpGo.transform.parent = this.transform;
+                        warpGo.transform.localPosition = transform.InverseTransformPoint(position);
+
+                        // 添加 Spherify Warp 组件
+                        MegaSpherifyWarp warp = warpGo.AddComponent<MegaSpherifyWarp>();
+                        warp.FallOff = influenceRadius;
+                        warp.percent = 75f;
+                        warp.Enabled = true;
+
+                        // 为每个包含 MeshFilter 的子对象添加 MegaModifyObject 和 MegaWarpBind
+                        foreach (var warpBind in meshWarpBinds.Values)
+                        {
+                            warpBind.SourceWarpObj = warpGo;
+                        }
+                        sensorWarps[sensor.sensorId] = warp;
                     }
                     else if (sensor.sensorType == "应力传感器")
                     {
@@ -319,24 +370,7 @@ public class DeformableModelController : MonoBehaviour
 
     void Awake()
     {
-        // 自动查找所有子网格
-        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
-        meshes = new Mesh[meshFilters.Length];
-        originalVertices = new Vector3[meshFilters.Length][];
-        deformedVertices = new Vector3[meshFilters.Length][];
 
-        meshRenderers = GetComponentsInChildren<MeshRenderer>();
-        originalColors = new Color[meshFilters.Length][];
-
-        for (int i = 0; i < meshFilters.Length; i++)
-        {
-            //创建一个可写入的网格实例副本
-            meshes[i] = Instantiate(meshFilters[i].mesh);
-            meshFilters[i].mesh = meshes[i]; // 将新的可写入网格赋值给MeshFilter
-
-            originalVertices[i] = meshes[i].vertices;
-            deformedVertices[i] = new Vector3[originalVertices[i].Length];
-        }
     }
 
 
@@ -353,11 +387,7 @@ public class DeformableModelController : MonoBehaviour
     /// </summary>
     public void UpdateDisplacementData(int sensorId, Vector3 newDisplacement)
     {
-        if (sensorPositions.ContainsKey(sensorId))
-        {
-            currentDisplacements[sensorId] = newDisplacement;
-            UpdateModelDeformation();
-        }
+
     }
     /// <summary>
     /// 接收并更新应力传感器的最新应力数据
@@ -367,93 +397,7 @@ public class DeformableModelController : MonoBehaviour
         if (sensorPositions.ContainsKey(sensorId))
         {
             currentStressValues[sensorId] = newStress;
-            UpdateStressVisualization();
-        }
-    }
-
-    /// <summary>
-    /// 更新模型变形的逻辑
-    /// </summary>
-    void UpdateModelDeformation()
-    {
-        for (int meshIndex = 0; meshIndex < meshes.Length; meshIndex++)
-        {
-            // 将原始顶点复制到变形顶点数组，每次更新都从原始状态开始
-            originalVertices[meshIndex].CopyTo(deformedVertices[meshIndex], 0);
-
-            foreach (var displacementEntry in currentDisplacements)
-            {
-                int sensorId = displacementEntry.Key;
-                Vector3 displacement = displacementEntry.Value;
-
-                if (sensorPositions.ContainsKey(sensorId))
-                {
-                    Vector3 sensorLocalPosition = sensorPositions[sensorId];
-                    Vector3 displacementLocal = transform.InverseTransformDirection(displacement);
-
-                    for (int i = 0; i < deformedVertices[meshIndex].Length; i++)
-                    {
-                        Vector3 vertexLocalPosition = originalVertices[meshIndex][i];
-                        float distance = Vector3.Distance(vertexLocalPosition, sensorLocalPosition);
-
-                        if (distance < influenceRadius)
-                        {
-                            // 计算衰减影响，例如线性衰减
-                            float influence = 1.0f - (distance / influenceRadius);
-                            deformedVertices[meshIndex][i] += displacementLocal * influence;
-                        }
-                    }
-                }
-            }
-            // 将变形后的顶点赋值给网格
-            meshes[meshIndex].vertices = deformedVertices[meshIndex];
-            meshes[meshIndex].RecalculateNormals();
-            meshes[meshIndex].RecalculateBounds();
-        }
-    }
-
-    /// <summary>
-    /// 更新模型应力可视化的逻辑
-    /// </summary>
-    void UpdateStressVisualization()
-    {
-        for (int meshIndex = 0; meshIndex < meshes.Length; meshIndex++)
-        {
-            Color[] colors = meshes[meshIndex].colors;
-
-            if (colors.Length == 0) continue; // 跳过没有颜色的网格
-
-            bool hasColorChange = false;
-
-            foreach (var stressEntry in currentStressValues)
-            {
-                int sensorId = stressEntry.Key;
-                float stressValue = stressEntry.Value;
-
-                if (sensorPositions.ContainsKey(sensorId))
-                {
-                    Vector3 sensorLocalPosition = sensorPositions[sensorId];
-
-                    for (int i = 0; i < colors.Length; i++)
-                    {
-                        float distance = Vector3.Distance(originalVertices[meshIndex][i], sensorLocalPosition);
-                        if (distance < influenceRadius)
-                        {
-                            hasColorChange = true;
-                            float influence = 1.0f - (distance / influenceRadius);
-                            float normalizedStress = Mathf.Clamp01(stressValue / 100.0f);
-                            Color stressColor = stressColorGradient.Evaluate(normalizedStress);
-
-                            colors[i] = Color.Lerp(colors[i], stressColor, influence);
-                        }
-                    }
-                }
-            }
-
-            if (hasColorChange)
-            {
-                meshes[meshIndex].colors = colors;
-            }
+            
         }
     }
 

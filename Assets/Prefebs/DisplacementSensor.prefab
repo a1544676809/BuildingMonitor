@@ -63,6 +63,7 @@ MonoBehaviour:
     deflectionValue: 0
     totalDisplacement: 0
   uiController: {fileID: 0}
+  unityBaseline: {x: 0, y: 0, z: 0}
 --- !u!65 &7542354408118919115
 BoxCollider:
   m_ObjectHideFlags: 0

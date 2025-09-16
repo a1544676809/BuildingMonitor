@@ -64,7 +64,7 @@ namespace UI.Tables
             if (canvas == null)
             {
                 // Attempt to find a canvas anywhere
-                canvas = UnityEngine.Object.FindObjectOfType<Canvas>();
+                canvas = UnityEngine.Object.FindAnyObjectByType<Canvas>();
 
                 if (canvas != null) return canvas.transform;
             }
